@@ -9,8 +9,8 @@ import org.springframework.web.bind.annotation.RestController;
 public class IndexController {
 	
 	@GetMapping
-	public String hello() {
-		return "Hello word API";
+	public String getCarros() {
+		return "Api dos Carros";
 	}
 
 }
