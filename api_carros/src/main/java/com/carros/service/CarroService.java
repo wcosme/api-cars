@@ -1,11 +1,14 @@
 package com.carros.service;
 
+import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.carros.domain.Carro;
+import com.carros.domain.dto.CarroDTO;
 import com.carros.repository.CarroRepository;
 
 @Service
@@ -14,17 +17,16 @@ public class CarroService {
 	@Autowired
 	private CarroRepository rep;
 
-	public Iterable<Carro> getCarros() {
-		return rep.findAll();
+	public List<CarroDTO> getCarros() {		
+		return rep.findAll().stream().map(CarroDTO::create).collect(Collectors.toList());		
 	}
 
-	public Optional<Carro> getCarrosById(Long id) {
-		return rep.findById(id);
+	public Optional<CarroDTO> getCarrosById(Long id) {
+		return rep.findById(id).map(CarroDTO::create);
 	}
 
-	public Iterable<Carro> getCarrosByTipo(String tipo) {
-
-		return rep.findByTipo(tipo);
+	public List<CarroDTO> getCarrosByTipo(String tipo) {	
+		return rep.findByTipo(tipo).stream().map(CarroDTO::create).collect(Collectors.toList());
 	}
 
 	public Carro save(Carro carro) {
@@ -53,11 +55,10 @@ public class CarroService {
 
 	public void delete(Long id) {
 		// Busca o objeto no banco de dados
-		Optional<Carro> carro = rep.findById(id);
-		if (carro.isPresent()) {			
+		if (getCarrosById(id).isPresent()) {			
 			rep.deleteById(id);
 		} else {
 			throw new RuntimeException("Não foi possível excluir o registro");
-		}
+		}		
 	}
 }

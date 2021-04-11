@@ -1,5 +1,6 @@
 package com.carros.controllers;
 
+import java.util.List;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,6 +15,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.carros.domain.Carro;
+import com.carros.domain.dto.CarroDTO;
 import com.carros.service.CarroService;
 
 @RestController
@@ -24,13 +26,14 @@ public class CarroController {
 	private CarroService service;
 	
 	@GetMapping
-	public ResponseEntity<Iterable<Carro>>  getAll() {
+	public ResponseEntity<List<CarroDTO>>  getAll() {
 		return ResponseEntity.ok(service.getCarros());
+		
 	}
 	
 	@GetMapping("/{id}")
-	public ResponseEntity<Carro> getById(@PathVariable("id") Long id) {
-		Optional<Carro> carro = service.getCarrosById(id);
+	public ResponseEntity<CarroDTO> getById(@PathVariable("id") Long id) {
+		Optional<CarroDTO> carro = service.getCarrosById(id);
 		
 		//Usando Lambda
 		return carro.map(c-> ResponseEntity.ok(c)).orElse(ResponseEntity.notFound().build());
@@ -46,8 +49,12 @@ public class CarroController {
 	}
 	
 	@GetMapping("/tipo/{tipo}")
-	public Iterable<Carro> getByTipo(@PathVariable("tipo") String tipo) {
-		return service.getCarrosByTipo(tipo);
+	public ResponseEntity<List<CarroDTO>> getByTipo(@PathVariable("tipo") String tipo) {
+		List<CarroDTO> listaDecarros = service.getCarrosByTipo(tipo);
+		
+		return listaDecarros.isEmpty() ?
+				ResponseEntity.noContent().build() :
+				ResponseEntity.ok(listaDecarros);
 	}
 	
 	@PostMapping
