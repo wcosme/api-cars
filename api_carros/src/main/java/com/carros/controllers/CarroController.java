@@ -1,5 +1,6 @@
 package com.carros.controllers;
 
+import java.net.URI;
 import java.util.List;
 import java.util.Optional;
 
@@ -13,6 +14,7 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import com.carros.domain.Carro;
 import com.carros.domain.dto.CarroDTO;
@@ -58,24 +60,36 @@ public class CarroController {
 	}
 	
 	@PostMapping
-	public String save(@RequestBody Carro carro) {
-		Carro car = service.save(carro);
+	public ResponseEntity<CarroDTO> post(@RequestBody Carro carro) {
 		
-		return "Carro salvo com sucesso " + car.toString();
+		try {
+			CarroDTO dto = service.insert(carro);
+			
+			URI location = getURI(dto.getId());
+			return ResponseEntity.created(location).build();
+		}catch (Exception e) {
+			return ResponseEntity.badRequest().build();
+		}
 	}
 	
 	@PutMapping("/{id}")
-	public String update(@PathVariable("id") Long id, @RequestBody Carro carro) {
-		Carro c = service.update(carro, id);
-		return "Carro atualizado com sucesso. " + c.getId();
+	public ResponseEntity<CarroDTO> put(@PathVariable("id") Long id, @RequestBody Carro carro) {
+		CarroDTO c = service.update(carro, id);
+		return c != null ? ResponseEntity.ok(c) : ResponseEntity.notFound().build();
 		
 	}
 	
 	@DeleteMapping("/{id}")
-	public String delete(@PathVariable("id") Long id) {
-		service.delete( id);
-		return "Carro deletado com sucesso. " + id;
+	public ResponseEntity<CarroDTO> delete(@PathVariable("id") Long id) {
+		boolean ok = service.delete( id);
+		
+		return ok ?
+				ResponseEntity.ok().build() : 
+				ResponseEntity.notFound().build();
 		
 	}
-
+	
+	private URI getURI(Long id) {
+		return ServletUriComponentsBuilder.fromCurrentRequest().path("/{id}").buildAndExpand(id).toUri();
+	}
 }
